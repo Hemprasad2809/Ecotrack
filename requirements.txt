@@ -24,7 +24,9 @@ scipy==1.15.2
 joblib==1.4.2
 
 # Machine Learning (for model files)
-torch==2.3.0+cpu --index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.0+cpu
+
 transformers>=4.30.0
 accelerate>=0.20.0
 
@@ -60,4 +62,5 @@ certifi>=2023.7.22
 charset-normalizer>=3.0.0
 idna>=3.4
 urllib3>=2.0.0
+
 
