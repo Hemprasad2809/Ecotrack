@@ -1959,4 +1959,4 @@ if __name__ == '__main__':
         db.create_all()
     threading.Thread(target=auto_release_slots, daemon=True).start()
 
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
