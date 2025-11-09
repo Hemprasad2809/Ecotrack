@@ -53,7 +53,7 @@ database_url = os.getenv('DATABASE_URL')
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql://ecouser:eco123@localhost:5432/ecotrackdb
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql://ecouser:eco123@localhost:5432/ecotrackdb'
 '
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'achp-2005-')  # Use environment variable
