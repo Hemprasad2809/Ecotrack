@@ -30,6 +30,8 @@ from geopy.distance import geodesic
 from polyline import decode
 from scipy.interpolate import interp1d
 
+import boto3
+
 
 import numpy as np
 from math import radians, cos, sin, sqrt,atan2
@@ -1623,6 +1625,24 @@ def plan_route():
         if route_map:
             route_map_file = "route_with_traffic_and_weather.html"
             route_map.save(route_map_file)
+            
+            # AWS SNS SMS notification
+            try:
+                import boto3
+                sns_topic_arn = 'arn:aws:sns:ap-southeast-2:470699573118:EcoTrackBookingTopic'
+                phone_number = '+919841602444'
+                message = f"Eco-route generated from {start_city} to {end_city}. Check your route map!"
+                
+                sns_client = boto3.client('sns', region_name='ap-southeast-2')
+                sns_client.publish(
+                    TopicArn=sns_topic_arn,
+                    Message=message,
+                    Subject='EcoRoute Notification'
+                )
+                print(f"[SNS] SMS notification sent successfully to {phone_number}")
+            except Exception as e:
+                print(f"[SNS] SMS error: {e}")
+            
             return jsonify(success=True, file=route_map_file)
         else:
             return jsonify(success=False, message="Error generating route"), 500

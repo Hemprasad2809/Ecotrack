@@ -16,6 +16,8 @@ python-dotenv>=1.0.0
 
 # AWS deployment
 gunicorn==23.0.0
+# AWS SNS
+boto3
 
 # Data processing and ML
 pandas==2.2.3
