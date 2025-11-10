@@ -694,6 +694,8 @@
                 <input type="date" id="bookingDate" placeholder="Booking Date">
                 <input type="time" id="startTime" placeholder="Start Time">
                 <input type="time" id="endTime" placeholder="End Time">
+                <input type="text" id="userPhone" placeholder="Phone Number" style="display:none;">
+                <input type="hidden" id="userId">
                 <button id="bookButton" onclick="bookSlot()">Book Slot</button>
             </div>
             <div class="details" id="slotDetails" style="display: none;"></div>
@@ -876,18 +878,22 @@
             const bookingDate = document.getElementById('bookingDate').value;
             const startTime = document.getElementById('startTime').value;
             const endTime = document.getElementById('endTime').value;
+            const userPhone = document.getElementById('userPhone').value;
+            const userId = document.getElementById('userId').value;
             const messageDiv = document.getElementById('message');
             messageDiv.innerHTML = '';
 
-            if (bookingDate && startTime && endTime) {
-                const response = await fetch('/api/book_slot', {
+            if (bookingDate && startTime && endTime && userPhone) {
+                const response = await fetch('https://m4xjgu2uwd.execute-api.ap-southeast-2.amazonaws.com/book_slot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         slot_id: slot.id,
                         booking_date: bookingDate,
                         start_time: startTime,
-                        end_time: endTime
+                        end_time: endTime,
+                        phone: userPhone,
+                        user_id: userId
                     })
                 });
 
@@ -897,7 +903,7 @@
                 // Display the OTP if booking is successful
                 if (result.otp) {
                     messageDiv.innerHTML += `<br>Your OTP for this booking is : <strong>${result.otp}</strong>`;
-                    messageDiv.innerHTML += `<br>An SMS with the OTP has been sent to your registered phone number.`;
+                    messageDiv.innerHTML += `<br>An SMS with the OTP has been sent to your phone.`;
                 }
                 const popupDetails = `Slot ID: ${slot.id}, Type: ${slot.slot_type}, Booking Date: ${bookingDate}, Start Time: ${startTime}, End Time: ${endTime}`;
                 document.getElementById("popupDetails").innerText = popupDetails;
@@ -905,7 +911,7 @@
                 displaySlotDetails(slot); // Show details of the booked slot
                 fetchSlots(); // Refresh slots
             } else {
-                messageDiv.textContent = "Please enter valid booking date, start time, and end time.";
+                messageDiv.textContent = "Please enter valid booking date, start time, end time, and phone number.";
             }
         }
 
@@ -928,6 +934,16 @@
 
         // Fetch parking lots on page load
         window.onload = fetchParkingLots;
+        // Set userPhone and userId from localStorage after login
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            if (userInfo.phone) {
+                document.getElementById('userPhone').value = userInfo.phone;
+            }
+            if (userInfo.id) {
+                document.getElementById('userId').value = userInfo.id;
+            }
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -332,6 +332,17 @@
         <p class="register-link">Don't have an account? <a href="/register">Register here</a></p>
     </div>
 
+    {% if user %}
+<script>
+  // Store user info in localStorage after successful login
+  const userInfo = {
+    phone: "{{ user.phone }}",
+    id: "{{ user.id }}"
+  };
+  localStorage.setItem('userInfo', JSON.stringify(userInfo));
+</script>
+{% endif %}
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Add will-change property to optimize animations

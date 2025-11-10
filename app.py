@@ -599,6 +599,7 @@ def register():
 # Login Route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    user = None
     if request.method == 'POST':
         try:
             email = request.form['email']
@@ -616,7 +617,7 @@ def login():
         except Exception as e:
             flash(f'Login failed: {str(e)}', 'danger')
 
-    return render_template('login.html')
+    return render_template('login.html', user=user)
 
 @app.route('/about', methods=['GET', 'POST'])
 def about():
