@@ -35,8 +35,6 @@ import boto3
 
 import numpy as np
 from math import radians, cos, sin, sqrt,atan2
-from flask_migrate import Migrate
-migrate = Migrate(app, db)
 
 
 # Load environment variables
@@ -52,6 +50,8 @@ logging.basicConfig(
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+
 
 # Database Configuration for AWS deployment
 database_url = os.getenv('DATABASE_URL')
@@ -75,6 +75,8 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
 
 # Initialize Flask-Mail
 mail = Mail(app)
