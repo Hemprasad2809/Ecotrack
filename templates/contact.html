@@ -1302,7 +1302,7 @@
         }
         
         // Contact Form Submission with optimized event handler
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', async function(e) {
           e.preventDefault();
           
           const formData = {
@@ -1315,11 +1315,31 @@
           // Log data to console (for demonstration)
           console.log('Form submitted:', formData);
           
-          // Show toast notification instead of alert for better UX
-          showToast();
-          
-          // Reset form
-          contactForm.reset();
+          try {
+            // Send data to backend
+            const response = await fetch('/save_contact', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            console.log('Backend response:', result);
+            
+            if (result.status === 'success') {
+              // Show toast notification for success
+              showToast();
+              // Reset form
+              contactForm.reset();
+            } else {
+              alert('Error: ' + result.message);
+            }
+          } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Failed to submit form. Please try again.');
+          }
         });
         
         // Background particle animation optimization
