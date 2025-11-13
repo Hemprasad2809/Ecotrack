@@ -35,6 +35,9 @@ import boto3
 
 import numpy as np
 from math import radians, cos, sin, sqrt,atan2
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
 
 # Load environment variables
 load_dotenv()
