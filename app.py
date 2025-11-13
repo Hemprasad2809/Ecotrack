@@ -1031,22 +1031,23 @@ class ContactFormSubmission(db.Model):
     
 @app.route('/save_contact', methods=['POST'])
 def save_contact():
+    import boto3
+    import json
+    
     data = request.get_json(force=True, silent=True) or request.form
     print("Incoming contact data:", data)
     name = data.get('name')
     email = data.get('email')
     subject = data.get('subject')
     message = data.get('message')
+    
+    print(f"[Contact Form] name={name}, email={email}, subject={subject}, message_len={len(message) if message else 0}")
 
     # AWS Comprehend sentiment analysis
     sentiment = 'UNKNOWN'
     sentiment_score = '{}'
     
     try:
-        import boto3
-        import json
-        from datetime import datetime
-        
         comprehend = boto3.client('comprehend', region_name='ap-southeast-2')
         response = comprehend.detect_sentiment(
             Text=message,
@@ -1073,9 +1074,16 @@ def save_contact():
         sentiment_score=sentiment_score
     )
     
+    print(f"[Contact Form] Created submission object: {contact_submission.name}, {contact_submission.email}")
+    
+    print(f"[Contact Form] Created submission object: {contact_submission.name}, {contact_submission.email}")
+    
     try:
+        print("[DB] Adding contact submission to session...")
         db.session.add(contact_submission)
+        print("[DB] Committing contact submission...")
         db.session.commit()
+        print("[DB] Contact submission committed successfully!")
         return jsonify({
             'status': 'success', 
             'message': 'Contact form submitted successfully!',
@@ -1084,6 +1092,8 @@ def save_contact():
         }), 201
     except Exception as e:
         print(f"[DB ERROR] Failed to insert contact form: {e}")
+        print(f"[DB ERROR] Exception type: {type(e)}")
+        print(f"[DB ERROR] Exception details: {repr(e)}")
         db.session.rollback()  # Rollback the session in case of error
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
