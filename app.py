@@ -1024,6 +1024,8 @@ class ContactFormSubmission(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime)
+    sentiment = db.Column(db.String(50))  # POSITIVE, NEGATIVE, NEUTRAL, MIXED, UNKNOWN
+    sentiment_score = db.Column(db.Text)  # JSON string with detailed scores
     
 @app.route('/save_contact', methods=['POST'])
 def save_contact():
@@ -1033,18 +1035,50 @@ def save_contact():
     subject = data.get('subject')
     message = data.get('message')
 
+    # AWS Comprehend sentiment analysis
+    sentiment = 'UNKNOWN'
+    sentiment_score = '{}'
+    
+    try:
+        import boto3
+        import json
+        from datetime import datetime
+        
+        comprehend = boto3.client('comprehend', region_name='ap-southeast-2')
+        response = comprehend.detect_sentiment(
+            Text=message,
+            LanguageCode='en'
+        )
+        
+        sentiment = response.get('Sentiment', 'UNKNOWN')
+        sentiment_score = json.dumps(response.get('SentimentScore', {}))
+        print(f"[Comprehend] Sentiment: {sentiment}, Scores: {sentiment_score}")
+        
+    except Exception as e:
+        print(f"[Comprehend] Error analyzing sentiment: {e}")
+        sentiment = 'UNKNOWN'
+        sentiment_score = '{}'
+
     # Create a new contact form submission
     contact_submission = ContactFormSubmission(
         name=name,
         email=email,
         subject=subject,
-        message=message
+        message=message,
+        timestamp=datetime.now(),
+        sentiment=sentiment,
+        sentiment_score=sentiment_score
     )
     
     try:
         db.session.add(contact_submission)
         db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Contact form submitted successfully!'}), 201
+        return jsonify({
+            'status': 'success', 
+            'message': 'Contact form submitted successfully!',
+            'sentiment': sentiment,
+            'sentiment_score': json.loads(sentiment_score)
+        }), 201
     except Exception as e:
         db.session.rollback()  # Rollback the session in case of error
         return jsonify({'status': 'error', 'message': str(e)}), 500
