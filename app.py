@@ -53,12 +53,9 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 
 
-# Database Configuration for AWS deployment
-database_url = os.getenv('DATABASE_URL')
-if database_url and database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql://ecouser:eco123@localhost:5432/ecotrackdb'
+
+app.config['SQLALCHEMY_DATABASE_URI'] ='postgresql://ecouser:eco123@localhost:5432/ecotrackdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'achp-2005-')  # Use environment variable
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -1034,7 +1031,8 @@ class ContactFormSubmission(db.Model):
     
 @app.route('/save_contact', methods=['POST'])
 def save_contact():
-    data = request.json
+    data = request.get_json(force=True, silent=True) or request.form
+    print("Incoming contact data:", data)
     name = data.get('name')
     email = data.get('email')
     subject = data.get('subject')
@@ -1085,6 +1083,7 @@ def save_contact():
             'sentiment_score': json.loads(sentiment_score)
         }), 201
     except Exception as e:
+        print(f"[DB ERROR] Failed to insert contact form: {e}")
         db.session.rollback()  # Rollback the session in case of error
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
